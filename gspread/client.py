@@ -39,6 +39,7 @@ class Client(object):
 
     :param auth: A tuple containing an *email* and a *password* used for ClientLogin
                  authentication.
+    :param oauth_token: OAuth2 access token used to authenticate API requests
     :param http_session: (optional) A session object capable of making HTTP requests while persisting headers.
                                     Defaults to :class:`~gspread.httpsession.HTTPSession`.
 
@@ -46,11 +47,17 @@ class Client(object):
     >>>
 
     """
-    def __init__(self, auth, http_session=None):
-        self.auth = auth
+    def __init__(self, auth=None, oauth_token=None, http_session=None):
+        if auth:
+            self.auth = auth
 
         if not http_session:
             self.session = HTTPSession()
+
+        if oauth_token:
+            self.oauth_token = oauth_token
+            oauth_header = 'OAuth %s' % oauth_token
+            self.session.add_header('Authorization', oauth_header)
 
     def _get_auth_token(self, content):
         for line in content.splitlines():
